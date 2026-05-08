@@ -1,0 +1,10 @@
+# Compiled binary (matches the module name)
+conversation_and_search
+
+# Local env file with real credentials
+.env
+
+# Go build artifacts
+*.exe
+*.test
+*.out
