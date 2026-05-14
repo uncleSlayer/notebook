@@ -6,15 +6,15 @@ import (
 	"net/http"
 	"os"
 
-	"undefined"
-	"undefined/models/components"
+	"github.com/my-company/company-go-sdk"
+	"github.com/my-company/company-go-sdk/models/components"
 )
 
-func NewClient(email, password string) (*undefined.SDK, error) {
+func NewClient(email, password string) (*pipeshub.Pipeshub, error) {
 	baseURL := os.Getenv("PIPESHUB_BASE_URL") + "/api/v1"
 	ctx := context.Background()
 
-	s := undefined.New(undefined.WithServerURL(baseURL))
+	s := pipeshub.New(pipeshub.WithServerURL(baseURL))
 
 	initRes, err := s.UserAccount.InitAuth(ctx, &components.InitAuthRequest{Email: &email})
 	if err != nil {
@@ -36,8 +36,8 @@ func NewClient(email, password string) (*undefined.SDK, error) {
 	}
 	accessToken := authRes.AuthenticateResponse.AuthenticateFinalResponse.AccessToken
 
-	return undefined.New(
-		undefined.WithServerURL(baseURL),
-		undefined.WithSecurity(components.Security{BearerAuth: &accessToken}),
+	return pipeshub.New(
+		pipeshub.WithServerURL(baseURL),
+		pipeshub.WithSecurity(components.Security{BearerAuth: &accessToken}),
 	), nil
 }

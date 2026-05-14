@@ -7,8 +7,8 @@ import (
 	"os"
 
 	"github.com/joho/godotenv"
-	"undefined/models/components"
-	"undefined/models/operations"
+	"github.com/my-company/company-go-sdk/models/components"
+	"github.com/my-company/company-go-sdk/models/operations"
 
 	"enterprise_search/auth"
 )

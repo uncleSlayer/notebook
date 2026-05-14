@@ -8,9 +8,9 @@ import (
 	"os"
 
 	"github.com/joho/godotenv"
-	"undefined"
-	"undefined/models/components"
-	"undefined/models/operations"
+	"github.com/my-company/company-go-sdk"
+	"github.com/my-company/company-go-sdk/models/components"
+	"github.com/my-company/company-go-sdk/models/operations"
 
 	"enterprise_search/auth"
 )
@@ -41,10 +41,12 @@ func main() {
 	}
 
 	query := "What are some latest news from stock market?"
+	chatMode := "internal_search"
 
 	res, err := client.Conversations.StreamChat(ctx, components.CreateConversationRequest{
-		Query:   query,
-		Filters: &components.Filters{Apps: []components.AppType{components.AppType(connectorID)}},
+		Query:    query,
+		ChatMode: &chatMode,
+		Filters:  &components.Filters{Apps: []string{connectorID}},
 	})
 	if err != nil {
 		log.Fatalf("conversation: %v", err)
@@ -91,7 +93,7 @@ func main() {
 	}
 }
 
-func findConnectorIDByName(ctx context.Context, sdk *undefined.SDK, name string) (string, error) {
+func findConnectorIDByName(ctx context.Context, sdk *pipeshub.Pipeshub, name string) (string, error) {
 	res, err := sdk.KnowledgeHub.GetKnowledgeHubRootNodes(ctx, operations.GetKnowledgeHubRootNodesRequest{})
 	if err != nil {
 		return "", fmt.Errorf("get knowledge hub root nodes: %w", err)

@@ -7,8 +7,8 @@ import (
 	"os"
 
 	"github.com/joho/godotenv"
-	"undefined/models/components"
-	"undefined/models/operations"
+	"github.com/my-company/company-go-sdk/models/components"
+	"github.com/my-company/company-go-sdk/models/operations"
 
 	"enterprise_search/auth"
 )
@@ -50,7 +50,7 @@ func main() {
 
 	res, err := client.SemanticSearch.Search(ctx, components.SemanticSearchRequest{
 		Query:   "What are some latest news about the stock market?",
-		Filters: &components.Filters{Apps: []components.AppType{components.AppType(connectorID)}},
+		Filters: &components.Filters{Apps: []string{connectorID}},
 	})
 	if err != nil {
 		log.Fatalf("search: %v", err)

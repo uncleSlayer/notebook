@@ -8,9 +8,9 @@ import (
 	"os"
 
 	"github.com/joho/godotenv"
-	"undefined"
-	"undefined/models/components"
-	"undefined/models/operations"
+	"github.com/my-company/company-go-sdk"
+	"github.com/my-company/company-go-sdk/models/components"
+	"github.com/my-company/company-go-sdk/models/operations"
 
 	"enterprise_search/auth"
 )
@@ -41,10 +41,12 @@ func main() {
 	}
 
 	query := "Who moved the cheese?"
+	chatMode := "internal_search"
 
 	res, err := sdk.Conversations.StreamChat(ctx, components.CreateConversationRequest{
-		Query:   query,
-		Filters: &components.Filters{Kb: []string{kbID}},
+		Query:    query,
+		ChatMode: &chatMode,
+		Filters:  &components.Filters{Kb: []string{kbID}},
 	})
 	if err != nil {
 		log.Fatalf("conversation: %v", err)
@@ -91,7 +93,7 @@ func main() {
 	}
 }
 
-func findKnowledgeBaseID(ctx context.Context, sdk *undefined.SDK, name string) (string, error) {
+func findKnowledgeBaseID(ctx context.Context, sdk *pipeshub.Pipeshub, name string) (string, error) {
 	parentID, err := getKnowledgeBaseParentID(ctx, sdk)
 	if err != nil {
 		return "", err
@@ -123,7 +125,7 @@ func findKnowledgeBaseID(ctx context.Context, sdk *undefined.SDK, name string) (
 // Before getting the knowledge bases available for the org, we need to find out the org id
 // Parent ID is the org id prefixed with "knowledgeBase_"
 
-func getKnowledgeBaseParentID(ctx context.Context, sdk *undefined.SDK) (string, error) {
+func getKnowledgeBaseParentID(ctx context.Context, sdk *pipeshub.Pipeshub) (string, error) {
 	orgRes, err := sdk.Organizations.GetCurrentOrganization(ctx)
 	if err != nil {
 		return "", fmt.Errorf("get current organization: %w", err)
