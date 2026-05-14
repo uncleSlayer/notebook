@@ -8,9 +8,9 @@ import (
 	"os"
 
 	"github.com/joho/godotenv"
-	"github.com/my-company/company-go-sdk"
-	"github.com/my-company/company-go-sdk/models/components"
-	"github.com/my-company/company-go-sdk/models/operations"
+	pipeshub "github.com/pipeshub-ai/pipeshub-sdk-go"
+	"github.com/pipeshub-ai/pipeshub-sdk-go/models/components"
+	"github.com/pipeshub-ai/pipeshub-sdk-go/models/operations"
 
 	"enterprise_search/auth"
 )
@@ -103,7 +103,7 @@ func findConnectorIDByName(ctx context.Context, sdk *pipeshub.Pipeshub, name str
 	}
 
 	for _, n := range res.KnowledgeHubNodesResponse.GetItems() {
-		if n.Name == name && n.Origin == components.KnowledgeHubNodeOriginConnector {
+		if n.Name == name && n.Origin == components.OriginConnector {
 			return n.ID, nil
 		}
 	}

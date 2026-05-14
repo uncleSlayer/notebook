@@ -8,7 +8,7 @@ import (
 	"os"
 
 	"github.com/joho/godotenv"
-	"github.com/my-company/company-go-sdk/models/components"
+	"github.com/pipeshub-ai/pipeshub-sdk-go/models/components"
 
 	"enterprise_search/auth"
 )

@@ -7,8 +7,8 @@ import (
 	"os"
 
 	"github.com/joho/godotenv"
-	"github.com/my-company/company-go-sdk/models/components"
-	"github.com/my-company/company-go-sdk/models/operations"
+	"github.com/pipeshub-ai/pipeshub-sdk-go/models/components"
+	"github.com/pipeshub-ai/pipeshub-sdk-go/models/operations"
 
 	"enterprise_search/auth"
 )
@@ -34,14 +34,27 @@ func main() {
 	ctx := context.Background()
 
 	name := knowledgeBaseName
-	kbsRes, err := client.KnowledgeBases.ListKnowledgeBases(ctx, operations.ListKnowledgeBasesRequest{Search: &name})
+
+	orgRes, err := client.Organizations.GetCurrentOrganization(ctx)
+	if err != nil {
+		log.Fatalf("get current organization: %v", err)
+	}
+	if orgRes == nil || orgRes.Organization == nil || orgRes.Organization.ID == nil || *orgRes.Organization.ID == "" {
+		log.Fatal("get current organization: missing organization id")
+	}
+	parentID := "knowledgeBase_" + *orgRes.Organization.ID
+
+	kbsRes, err := client.KnowledgeHub.GetKnowledgeHubChildNodes(ctx, operations.GetKnowledgeHubChildNodesRequest{
+		ParentType: operations.ParentTypeApp,
+		ParentID:   parentID,
+	})
 	if err != nil {
 		log.Fatalf("list knowledge bases: %v", err)
 	}
 	var kbID string
-	for _, kb := range kbsRes.Object.GetKnowledgeBases() {
-		if kb.Name == name && kb.ID != nil {
-			kbID = *kb.ID
+	for _, kb := range kbsRes.KnowledgeHubNodesResponse.GetItems() {
+		if kb.Name == name {
+			kbID = kb.ID
 			break
 		}
 	}

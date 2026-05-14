@@ -8,7 +8,7 @@ Four minimal Go programs that authenticate against a PipesHub instance and run e
 - A running PipesHub instance (default: `http://localhost:3000`)
 - A user account on that instance
 - At least one knowledge base and/or connector with indexed content
-- The PipesHub Go SDK checked out locally (referenced via the `replace` directive in `go.mod`, pointing at `/home/siddhant/dev/pipeshub-go/sdk`)
+- The PipesHub Go SDK (`github.com/pipeshub-ai/pipeshub-sdk-go`) — pulled in automatically by `go mod tidy`
 
 ## Setup
 
@@ -76,7 +76,7 @@ All four programs import `enterprise_search/auth` to get an authenticated `*pipe
 
 ## Notes
 
-- The SDK module is referenced by a local `replace` directive. If you move the SDK, update `replace github.com/my-company/company-go-sdk => ...` in `go.mod`.
+- The SDK module (`github.com/pipeshub-ai/pipeshub-sdk-go`) is fetched from the public module proxy via `go mod tidy`. To pin a specific version, run `go get github.com/pipeshub-ai/pipeshub-sdk-go@<version>`.
 - Each leaf subdirectory is its own Go package with its own `main()` — Go requires one `main` per package, so each runnable demo lives in its own directory, but they all share the parent module and the `auth/` package.
 - Conversation calls require an AI model provider to be configured on your PipesHub instance; otherwise the server returns `500 — Failed to get AI response`.
 

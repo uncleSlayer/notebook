@@ -8,9 +8,9 @@ import (
 	"os"
 
 	"github.com/joho/godotenv"
-	"github.com/my-company/company-go-sdk"
-	"github.com/my-company/company-go-sdk/models/components"
-	"github.com/my-company/company-go-sdk/models/operations"
+	pipeshub "github.com/pipeshub-ai/pipeshub-sdk-go"
+	"github.com/pipeshub-ai/pipeshub-sdk-go/models/components"
+	"github.com/pipeshub-ai/pipeshub-sdk-go/models/operations"
 
 	"enterprise_search/auth"
 )
@@ -99,23 +99,22 @@ func findKnowledgeBaseID(ctx context.Context, sdk *pipeshub.Pipeshub, name strin
 		return "", err
 	}
 
-	kbsRes, err := sdk.KnowledgeBases.ListKnowledgeBases(ctx, operations.ListKnowledgeBasesRequest{})
+	kbsRes, err := sdk.KnowledgeHub.GetKnowledgeHubChildNodes(ctx, operations.GetKnowledgeHubChildNodesRequest{
+		ParentType: operations.ParentTypeApp,
+		ParentID:   parentID,
+	})
 	if err != nil {
 		return "", fmt.Errorf("list knowledge bases: %w", err)
 	}
-	if kbsRes == nil || kbsRes.Object == nil {
+	if kbsRes == nil || kbsRes.KnowledgeHubNodesResponse == nil {
 		return "", fmt.Errorf("list knowledge bases: empty response")
 	}
 
 	fmt.Println("[debug] available knowledge bases:")
-	for _, kb := range kbsRes.Object.GetKnowledgeBases() {
-		id := ""
-		if kb.ID != nil {
-			id = *kb.ID
-		}
-		fmt.Printf("  - %q (id=%s)\n", kb.Name, id)
-		if kb.Name == name && kb.ID != nil {
-			return *kb.ID, nil
+	for _, kb := range kbsRes.KnowledgeHubNodesResponse.GetItems() {
+		fmt.Printf("  - %q (id=%s)\n", kb.Name, kb.ID)
+		if kb.Name == name {
+			return kb.ID, nil
 		}
 	}
 
