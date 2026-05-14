@@ -35,12 +35,14 @@ From inside `enterprise_search/`:
 
 ```bash
 # Semantic search
-go run ./semantic_search/knowledgebase .env
+https://github.com/pipeshub-ai/notebook/pull/9
 go run ./semantic_search/connector   .env
 
 # AI conversation
-go run ./conversation/knowledgebase  .env
-go run ./conversation/connector      .env
+go run ./conversation/knowledgebase   .env
+go run ./conversation/connector       .env
+go run ./conversation/web_search      .env
+go run ./conversation/internal_search .env
 ```
 
 The path argument is the location of your `.env` file.
@@ -62,7 +64,9 @@ enterprise_search/
 │   └── connector/main.go               SemanticSearch.Search, connector-filtered
 └── conversation/
     ├── knowledgebase/main.go           Conversations.StreamChat, KB-filtered
-    └── connector/main.go               Conversations.StreamChat, connector-filtered
+    ├── connector/main.go               Conversations.StreamChat, connector-filtered
+    ├── web_search/main.go              Conversations.StreamChat, chatMode=web_search
+    └── internal_search/main.go         Conversations.StreamChat, chatMode=internal_search (KB + connector filters)
 ```
 
 All four programs import `enterprise_search/auth` to get an authenticated `*pipeshub.SDK`, then differ only in which SDK call and which `Filters` they use:
@@ -75,3 +79,4 @@ All four programs import `enterprise_search/auth` to get an authenticated `*pipe
 - The SDK module is referenced by a local `replace` directive. If you move the SDK, update `replace pipeshub => ...` in `go.mod`.
 - Each leaf subdirectory is its own Go package with its own `main()` — Go requires one `main` per package, so each runnable demo lives in its own directory, but they all share the parent module and the `auth/` package.
 - Conversation calls require an AI model provider to be configured on your PipesHub instance; otherwise the server returns `500 — Failed to get AI response`.
+

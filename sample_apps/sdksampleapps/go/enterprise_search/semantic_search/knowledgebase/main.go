@@ -7,9 +7,13 @@ import (
 	"os"
 
 	"github.com/joho/godotenv"
-	"pipeshub/models/components"
+	"undefined/models/components"
+	"undefined/models/operations"
+
 	"enterprise_search/auth"
 )
+
+const knowledgeBaseName = "SDK-test"
 
 func main() {
 	if len(os.Args) < 2 {
@@ -27,9 +31,27 @@ func main() {
 		log.Fatal(err)
 	}
 
-	res, err := client.SemanticSearch.Search(context.Background(), components.SemanticSearchRequest{
-		Query:   "Who is the business brain?",
-		Filters: &components.Filters{Kb: []string{os.Getenv("KB_ID")}},
+	ctx := context.Background()
+
+	name := knowledgeBaseName
+	kbsRes, err := client.KnowledgeBases.ListKnowledgeBases(ctx, operations.ListKnowledgeBasesRequest{Search: &name})
+	if err != nil {
+		log.Fatalf("list knowledge bases: %v", err)
+	}
+	var kbID string
+	for _, kb := range kbsRes.Object.GetKnowledgeBases() {
+		if kb.Name == name && kb.ID != nil {
+			kbID = *kb.ID
+			break
+		}
+	}
+	if kbID == "" {
+		log.Fatalf("knowledge base %q not found", name)
+	}
+
+	res, err := client.SemanticSearch.Search(ctx, components.SemanticSearchRequest{
+		Query:   "Who moved the cheese?",
+		Filters: &components.Filters{Kb: []string{kbID}},
 	})
 	if err != nil {
 		log.Fatalf("search: %v", err)

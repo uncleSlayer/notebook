@@ -7,9 +7,13 @@ import (
 	"os"
 
 	"github.com/joho/godotenv"
-	"pipeshub/models/components"
+	"undefined/models/components"
+	"undefined/models/operations"
+
 	"enterprise_search/auth"
 )
+
+const connectorName = "abc news"
 
 func main() {
 	if len(os.Args) < 2 {
@@ -27,9 +31,26 @@ func main() {
 		log.Fatal(err)
 	}
 
-	res, err := client.SemanticSearch.Search(context.Background(), components.SemanticSearchRequest{
+	ctx := context.Background()
+
+	nodes, err := client.KnowledgeHub.GetKnowledgeHubRootNodes(ctx, operations.GetKnowledgeHubRootNodesRequest{})
+	if err != nil {
+		log.Fatalf("get knowledge hub root nodes: %v", err)
+	}
+	var connectorID string
+	for _, n := range nodes.KnowledgeHubNodesResponse.GetItems() {
+		if n.Name == connectorName && n.Origin == components.KnowledgeHubNodeOriginConnector {
+			connectorID = n.ID
+			break
+		}
+	}
+	if connectorID == "" {
+		log.Fatalf("connector %q not found", connectorName)
+	}
+
+	res, err := client.SemanticSearch.Search(ctx, components.SemanticSearchRequest{
 		Query:   "What are some latest news about the stock market?",
-		Filters: &components.Filters{Apps: []components.AppType{components.AppType(os.Getenv("CONNECTOR_ID"))}},
+		Filters: &components.Filters{Apps: []components.AppType{components.AppType(connectorID)}},
 	})
 	if err != nil {
 		log.Fatalf("search: %v", err)

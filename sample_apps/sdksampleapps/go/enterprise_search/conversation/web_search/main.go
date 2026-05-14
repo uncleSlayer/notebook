@@ -8,14 +8,10 @@ import (
 	"os"
 
 	"github.com/joho/godotenv"
-	"undefined"
 	"undefined/models/components"
-	"undefined/models/operations"
 
 	"enterprise_search/auth"
 )
-
-const connectorName = "abc news"
 
 func main() {
 	if len(os.Args) < 2 {
@@ -33,18 +29,12 @@ func main() {
 		log.Fatal(err)
 	}
 
-	ctx := context.Background()
+	query := "Where is Pipeshub hq located?"
+	chatMode := "web_search"
 
-	connectorID, err := findConnectorIDByName(ctx, client, connectorName)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	query := "What are some latest news from stock market?"
-
-	res, err := client.Conversations.StreamChat(ctx, components.CreateConversationRequest{
-		Query:   query,
-		Filters: &components.Filters{Apps: []components.AppType{components.AppType(connectorID)}},
+	res, err := client.Conversations.StreamChat(context.Background(), components.CreateConversationRequest{
+		Query:    query,
+		ChatMode: &chatMode,
 	})
 	if err != nil {
 		log.Fatalf("conversation: %v", err)
@@ -89,22 +79,4 @@ func main() {
 	if err := stream.Err(); err != nil {
 		log.Fatalf("stream: %v", err)
 	}
-}
-
-func findConnectorIDByName(ctx context.Context, sdk *undefined.SDK, name string) (string, error) {
-	res, err := sdk.KnowledgeHub.GetKnowledgeHubRootNodes(ctx, operations.GetKnowledgeHubRootNodesRequest{})
-	if err != nil {
-		return "", fmt.Errorf("get knowledge hub root nodes: %w", err)
-	}
-	if res == nil || res.KnowledgeHubNodesResponse == nil {
-		return "", fmt.Errorf("get knowledge hub root nodes: empty response")
-	}
-
-	for _, n := range res.KnowledgeHubNodesResponse.GetItems() {
-		if n.Name == name && n.Origin == components.KnowledgeHubNodeOriginConnector {
-			return n.ID, nil
-		}
-	}
-
-	return "", fmt.Errorf("connector %q not found", name)
 }

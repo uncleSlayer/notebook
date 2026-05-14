@@ -6,17 +6,17 @@ import (
 	"net/http"
 	"os"
 
-	"pipeshub"
-	"pipeshub/models/components"
+	"undefined"
+	"undefined/models/components"
 )
 
-func NewClient(email, password string) (*pipeshub.SDK, error) {
+func NewClient(email, password string) (*undefined.SDK, error) {
 	baseURL := os.Getenv("PIPESHUB_BASE_URL") + "/api/v1"
 	ctx := context.Background()
 
-	s := pipeshub.New(pipeshub.WithServerURL(baseURL))
+	s := undefined.New(undefined.WithServerURL(baseURL))
 
-	initRes, err := s.UserAccount.InitAuth(ctx, components.InitAuthRequest{Email: email})
+	initRes, err := s.UserAccount.InitAuth(ctx, &components.InitAuthRequest{Email: &email})
 	if err != nil {
 		return nil, fmt.Errorf("init auth: %w", err)
 	}
@@ -31,12 +31,13 @@ func NewClient(email, password string) (*pipeshub.SDK, error) {
 	if err != nil {
 		return nil, fmt.Errorf("authenticate: %w", err)
 	}
-	if authRes.AuthenticateResponse == nil || authRes.AuthenticateResponse.AccessToken == nil {
-		return nil, fmt.Errorf("no access token returned")
+	if authRes.AuthenticateResponse == nil || authRes.AuthenticateResponse.AuthenticateFinalResponse == nil {
+		return nil, fmt.Errorf("authenticate: expected final response, got multi-step or empty")
 	}
+	accessToken := authRes.AuthenticateResponse.AuthenticateFinalResponse.AccessToken
 
-	return pipeshub.New(
-		pipeshub.WithServerURL(baseURL),
-		pipeshub.WithSecurity(components.Security{BearerAuth: authRes.AuthenticateResponse.AccessToken}),
+	return undefined.New(
+		undefined.WithServerURL(baseURL),
+		undefined.WithSecurity(components.Security{BearerAuth: &accessToken}),
 	), nil
 }

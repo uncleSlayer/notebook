@@ -8,10 +8,14 @@ import (
 	"os"
 
 	"github.com/joho/godotenv"
-	"pipeshub/models/components"
+	"undefined"
+	"undefined/models/components"
+	"undefined/models/operations"
 
 	"enterprise_search/auth"
 )
+
+const knowledgeBaseName = "SDK-test"
 
 func main() {
 	if len(os.Args) < 2 {
@@ -21,7 +25,7 @@ func main() {
 		log.Fatalf("load .env: %v", err)
 	}
 
-	client, err := auth.NewClient(
+	sdk, err := auth.NewClient(
 		os.Getenv("PIPESHUB_TEST_USER_EMAIL"),
 		os.Getenv("PIPESHUB_TEST_USER_PASSWORD"),
 	)
@@ -29,11 +33,18 @@ func main() {
 		log.Fatal(err)
 	}
 
-	query := "Who is the business brain?"
+	ctx := context.Background()
 
-	res, err := client.Conversations.StreamChat(context.Background(), components.CreateConversationRequest{
+	kbID, err := findKnowledgeBaseID(ctx, sdk, knowledgeBaseName)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	query := "Who moved the cheese?"
+
+	res, err := sdk.Conversations.StreamChat(ctx, components.CreateConversationRequest{
 		Query:   query,
-		Filters: &components.Filters{Kb: []string{os.Getenv("KB_ID")}},
+		Filters: &components.Filters{Kb: []string{kbID}},
 	})
 	if err != nil {
 		log.Fatalf("conversation: %v", err)
@@ -78,4 +89,48 @@ func main() {
 	if err := stream.Err(); err != nil {
 		log.Fatalf("stream: %v", err)
 	}
+}
+
+func findKnowledgeBaseID(ctx context.Context, sdk *undefined.SDK, name string) (string, error) {
+	parentID, err := getKnowledgeBaseParentID(ctx, sdk)
+	if err != nil {
+		return "", err
+	}
+
+	kbsRes, err := sdk.KnowledgeBases.ListKnowledgeBases(ctx, operations.ListKnowledgeBasesRequest{})
+	if err != nil {
+		return "", fmt.Errorf("list knowledge bases: %w", err)
+	}
+	if kbsRes == nil || kbsRes.Object == nil {
+		return "", fmt.Errorf("list knowledge bases: empty response")
+	}
+
+	fmt.Println("[debug] available knowledge bases:")
+	for _, kb := range kbsRes.Object.GetKnowledgeBases() {
+		id := ""
+		if kb.ID != nil {
+			id = *kb.ID
+		}
+		fmt.Printf("  - %q (id=%s)\n", kb.Name, id)
+		if kb.Name == name && kb.ID != nil {
+			return *kb.ID, nil
+		}
+	}
+
+	return "", fmt.Errorf("knowledge base %q not found for parent %q", name, parentID)
+}
+
+// Before getting the knowledge bases available for the org, we need to find out the org id
+// Parent ID is the org id prefixed with "knowledgeBase_"
+
+func getKnowledgeBaseParentID(ctx context.Context, sdk *undefined.SDK) (string, error) {
+	orgRes, err := sdk.Organizations.GetCurrentOrganization(ctx)
+	if err != nil {
+		return "", fmt.Errorf("get current organization: %w", err)
+	}
+	if orgRes == nil || orgRes.Organization == nil || orgRes.Organization.ID == nil || *orgRes.Organization.ID == "" {
+		return "", fmt.Errorf("get current organization: missing organization id")
+	}
+
+	return "knowledgeBase_" + *orgRes.Organization.ID, nil
 }

@@ -4,7 +4,7 @@ go 1.22
 
 require (
 	github.com/joho/godotenv v1.5.1
-	pipeshub v0.0.0
+	undefined v0.0.0
 )
 
 require (
@@ -12,4 +12,4 @@ require (
 	golang.org/x/sync v0.8.0 // indirect
 )
 
-replace pipeshub => /home/siddhant/dev/go-sdk-new
+replace undefined => /home/siddhant/dev/go-sdk-new
