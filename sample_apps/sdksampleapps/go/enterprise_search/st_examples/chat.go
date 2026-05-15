@@ -65,7 +65,7 @@ func askFirst(ctx context.Context, sdk *pipeshub.Pipeshub, query, chatMode strin
 	if err != nil {
 		return "", fmt.Errorf("stream chat: %w", err)
 	}
-	if res.AssistantStreamSSEEvent == nil {
+	if res == nil || res.AssistantStreamSSEEvent == nil {
 		return "", fmt.Errorf("no SSE stream returned")
 	}
 	stream := res.AssistantStreamSSEEvent
