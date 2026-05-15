@@ -118,7 +118,7 @@ func askFollowUp(ctx context.Context, sdk *pipeshub.Pipeshub, convID, query stri
 	if err != nil {
 		return fmt.Errorf("add message stream: %w", err)
 	}
-	if res.AssistantMessageStreamSSEEvent == nil {
+	if res == nil || res.AssistantMessageStreamSSEEvent == nil {
 		return fmt.Errorf("no SSE stream returned")
 	}
 	stream := res.AssistantMessageStreamSSEEvent
