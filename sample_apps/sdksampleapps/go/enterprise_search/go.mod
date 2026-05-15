@@ -4,7 +4,7 @@ go 1.22
 
 require (
 	github.com/joho/godotenv v1.5.1
-	github.com/pipeshub-ai/pipeshub-sdk-go v0.0.0-20260514190007-8fedf66c6021
+	github.com/pipeshub-ai/pipeshub-sdk-go v0.1.0
 )
 
 require (

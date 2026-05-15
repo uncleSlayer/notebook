@@ -15,7 +15,7 @@ import (
 	"enterprise_search/auth"
 )
 
-const connectorName = "abc news"
+const connectorName = "ABC News RSS"
 
 func main() {
 	if len(os.Args) < 2 {
