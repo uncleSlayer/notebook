@@ -51,6 +51,9 @@ func main() {
 	if err != nil {
 		log.Fatalf("list knowledge bases: %v", err)
 	}
+	if kbsRes == nil || kbsRes.KnowledgeHubNodesResponse == nil {
+		log.Fatal("list knowledge bases: empty response")
+	}
 	var kbID string
 	for _, kb := range kbsRes.KnowledgeHubNodesResponse.GetItems() {
 		if kb.Name == name {

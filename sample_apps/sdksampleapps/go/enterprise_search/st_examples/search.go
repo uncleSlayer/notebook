@@ -13,8 +13,6 @@ import (
 	"enterprise_search/auth"
 )
 
-const connectorName = "abc news"
-
 func main() {
 	if len(os.Args) < 2 {
 		log.Fatal("usage: go run . <path-to-.env>")
@@ -33,32 +31,45 @@ func main() {
 
 	ctx := context.Background()
 
-	nodes, err := client.KnowledgeHub.GetKnowledgeHubRootNodes(ctx, operations.GetKnowledgeHubRootNodesRequest{})
+	orgRes, err := client.Organizations.GetCurrentOrganization(ctx)
 	if err != nil {
-		log.Fatalf("get knowledge hub root nodes: %v", err)
+		log.Fatalf("get current organization: %v", err)
 	}
-	if nodes == nil || nodes.KnowledgeHubNodesResponse == nil {
-		log.Fatal("get knowledge hub root nodes: empty response")
+	if orgRes == nil || orgRes.Organization == nil || orgRes.Organization.ID == nil || *orgRes.Organization.ID == "" {
+		log.Fatal("get current organization: missing organization id")
 	}
-	var connectorID string
-	for _, n := range nodes.KnowledgeHubNodesResponse.GetItems() {
-		if n.Name == connectorName && n.Origin == components.OriginConnector {
-			connectorID = n.ID
-			break
-		}
+	parentID := "knowledgeBase_" + *orgRes.Organization.ID
+
+	kbsRes, err := client.KnowledgeHub.GetKnowledgeHubChildNodes(ctx, operations.GetKnowledgeHubChildNodesRequest{
+		ParentType: operations.ParentTypeApp,
+		ParentID:   parentID,
+	})
+	if err != nil {
+		log.Fatalf("list knowledge bases: %v", err)
 	}
-	if connectorID == "" {
-		log.Fatalf("connector %q not found", connectorName)
+	if kbsRes == nil || kbsRes.KnowledgeHubNodesResponse == nil {
+		log.Fatal("list knowledge bases: empty response")
+	}
+	items := kbsRes.KnowledgeHubNodesResponse.GetItems()
+	kbIDs := make([]string, 0, len(items))
+	for _, kb := range items {
+		kbIDs = append(kbIDs, kb.ID)
+	}
+	if len(kbIDs) == 0 {
+		log.Fatal("no knowledge bases found")
 	}
 
 	res, err := client.SemanticSearch.Search(ctx, components.SemanticSearchRequest{
-		Query:   "What are some latest news about the stock market?",
-		Filters: &components.Filters{Apps: []string{connectorID}},
+		Query:   "What is SoundThinking?",
+		Filters: &components.Filters{Kb: kbIDs},
 	})
 	if err != nil {
 		log.Fatalf("search: %v", err)
 	}
 
+	if res == nil || res.SemanticSearchExecuteResponse == nil || res.SemanticSearchExecuteResponse.SearchResponse == nil {
+		log.Fatal("search: empty response")
+	}
 	for i, searchResult := range res.SemanticSearchExecuteResponse.SearchResponse.SearchResults {
 		name, _ := searchResult.Metadata.RecordName.GetOrZero()
 		id, _ := searchResult.Metadata.RecordID.GetOrZero()
