@@ -13,8 +13,6 @@ import (
 	"enterprise_search/auth"
 )
 
-const knowledgeBaseName = "soundthinking"
-
 func main() {
 	if len(os.Args) < 2 {
 		log.Fatal("usage: go run . <path-to-.env>")
@@ -49,20 +47,18 @@ func main() {
 	if err != nil {
 		log.Fatalf("list knowledge bases: %v", err)
 	}
-	var kbID string
-	for _, kb := range kbsRes.KnowledgeHubNodesResponse.GetItems() {
-		if kb.Name == knowledgeBaseName {
-			kbID = kb.ID
-			break
-		}
+	items := kbsRes.KnowledgeHubNodesResponse.GetItems()
+	kbIDs := make([]string, 0, len(items))
+	for _, kb := range items {
+		kbIDs = append(kbIDs, kb.ID)
 	}
-	if kbID == "" {
-		log.Fatalf("knowledge base %q not found", knowledgeBaseName)
+	if len(kbIDs) == 0 {
+		log.Fatal("no knowledge bases found")
 	}
 
 	res, err := client.SemanticSearch.Search(ctx, components.SemanticSearchRequest{
 		Query:   "What is SoundThinking?",
-		Filters: &components.Filters{Kb: []string{kbID}},
+		Filters: &components.Filters{Kb: kbIDs},
 	})
 	if err != nil {
 		log.Fatalf("search: %v", err)
