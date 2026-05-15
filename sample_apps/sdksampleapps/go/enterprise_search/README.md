@@ -18,9 +18,6 @@ Create a `.env` file in this directory:
 PIPESHUB_BASE_URL=http://localhost:3000
 PIPESHUB_TEST_USER_EMAIL=you@example.com
 PIPESHUB_TEST_USER_PASSWORD=your-password
-
-KB_ID=<knowledge-base-uuid>
-CONNECTOR_ID=<connector-instance-uuid>
 ```
 
 Install dependencies:
