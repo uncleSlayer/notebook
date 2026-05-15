@@ -37,6 +37,9 @@ func main() {
 	if err != nil {
 		log.Fatalf("get knowledge hub root nodes: %v", err)
 	}
+	if nodes == nil || nodes.KnowledgeHubNodesResponse == nil {
+		log.Fatal("get knowledge hub root nodes: empty response")
+	}
 	var connectorID string
 	for _, n := range nodes.KnowledgeHubNodesResponse.GetItems() {
 		if n.Name == connectorName && n.Origin == components.OriginConnector {

@@ -188,6 +188,9 @@ func listKnowledgeBaseIDs(ctx context.Context, sdk *pipeshub.Pipeshub) ([]string
 	if err != nil {
 		return nil, fmt.Errorf("list knowledge bases: %w", err)
 	}
+	if kbsRes == nil || kbsRes.KnowledgeHubNodesResponse == nil {
+		return nil, fmt.Errorf("list knowledge bases: empty response")
+	}
 	items := kbsRes.KnowledgeHubNodesResponse.GetItems()
 	ids := make([]string, 0, len(items))
 	for _, kb := range items {

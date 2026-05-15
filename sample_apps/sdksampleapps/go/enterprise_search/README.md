@@ -35,7 +35,6 @@ From inside `enterprise_search/`:
 
 ```bash
 # Semantic search
-https://github.com/pipeshub-ai/notebook/pull/9
 go run ./semantic_search/connector   .env
 
 # AI conversation
